@@ -46,16 +46,36 @@ public class BrowserStackTest extends BaseTest {
             System.out.println("No cookie popup displayed.");
         }
 
-        wait.until(ExpectedConditions.elementToBeClickable(
+        List<WebElement> opinionLinks = wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(
                 By.xpath("//a[contains(@href,'opinion')]")
-        )).click();
+        ));
+
+        boolean clicked = false;
+        for (WebElement link : opinionLinks) {
+            try {
+                link.click();
+                clicked = true;
+                break;
+            } catch (Exception e) {
+                // ignore and try next
+            }
+        }
+
+        if (!clicked) {
+            throw new RuntimeException("Unable to click on opinion link");
+        }
 
         List<WebElement> articles = driver.findElements(By.cssSelector("h2.c_t a"));
 
         List<String> articleUrls = new ArrayList<>();
 
         for (int i = 0; i < 5 && i < articles.size(); i++) {
-            articleUrls.add(articles.get(i).getAttribute("href"));
+            try {
+                articleUrls.add(articles.get(i).getAttribute("href"));
+            } catch (org.openqa.selenium.StaleElementReferenceException e) {
+                WebElement refreshed = driver.findElements(By.cssSelector("h2.c_t a")).get(i);
+                articleUrls.add(refreshed.getAttribute("href"));
+            }
         }
 
         List<String> translatedTitles = new ArrayList<>();
