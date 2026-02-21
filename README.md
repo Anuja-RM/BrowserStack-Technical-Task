@@ -1,1 +1,1 @@
-# BrowserStack-Technical-Task-
+# BrowserStack-Technical-Task
